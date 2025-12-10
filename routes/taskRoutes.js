@@ -1,11 +1,9 @@
 import express from 'express';
 import * as taskController from '../controllers/taskController.js';
 import checkAuth from '../middlewares/checkAuth.js';
-import checkAdmin from '../middlewares/checkAdmin.js';
+import { requireRole } from '../middlewares/roleMiddleware.js';
 
 const router = express.Router();
-
-router.use(checkAuth);
 
 /**
  * @openapi
@@ -33,15 +31,15 @@ router.use(checkAuth);
  *        description: Bad Request
  */
 
-router.post('/task', taskController.createTask);
+router.post('/task', checkAuth, taskController.createTask);
 
 /**
  * @openapi
- * '/api/task':
+ * '/api/task/my':
  *  get:
  *     tags:
  *     - Task
- *     summary: Get user tasks
+ *     summary: Get current user tasks
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -65,10 +63,10 @@ router.post('/task', taskController.createTask);
  *       400:
  *         description: Bad request
  */
-router.get('/task', taskController.getTasksByUserId);
-router.get('/task/all', checkAdmin, taskController.getAllTasks);
-router.get('/task/:id', taskController.getTask);
-router.put('/task/:id', taskController.updateTask);
-router.delete('/task/:id', taskController.deleteTask);
+router.get('/task/my', checkAuth, taskController.getTasksByUserId);
+router.get('/task/:id', checkAuth, taskController.getTask);
+router.put('/task/:id', checkAuth, taskController.updateTask);
+router.delete('/task/:id', checkAuth, taskController.deleteTask);
+router.get('/task', checkAuth, requireRole('admin'), taskController.getAllTasks);
 
 export default router;

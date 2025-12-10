@@ -4,7 +4,7 @@ import User from '../models/userModel.js';
 
 export const register = async (req, res) => {
     try {
-        const { username, email, password: pass, role } = req.body;
+        const { username, email, password: pass } = req.body;
 
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(pass, salt);
@@ -13,11 +13,10 @@ export const register = async (req, res) => {
             username,
             email,
             password: hash,
-            role,
+            role: 'user',
         });
 
-        const { password: _password, ...userData } = user._doc;
-        void _password;
+        const { password, ...userData } = user._doc;
 
         const token = jwt.sign(
             {
