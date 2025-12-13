@@ -10,7 +10,13 @@
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
         "lint:check": "eslint .",
-        "lint:fix": "eslint --fix ."
+        "lint:fix": "eslint --fix .",
+        "docker:up": "docker run -d --name task-manager-api --env-file .env -p 3001:3001 task-manager-api",
+        "docker:down": "docker rm -f task-manager-api",
+        "docker:build": "docker build -t task-manager-api .",
+        "docker:restart": "npm run docker:down && npm run docker:build && npm run docker:up",
+        "docker:logs": "docker logs -f task-manager-api",
+        "docker:ps": "docker ps"
     },
     "keywords": [],
     "author": "",

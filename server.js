@@ -12,7 +12,7 @@ import taskRouter from './routes/taskRoutes.js';
 import swaggerSpec from './config/swagger.js';
 
 const app = express();
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 3001;
 
 // middleware
 app.use(bodyParser.json());
