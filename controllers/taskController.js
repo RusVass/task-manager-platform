@@ -2,11 +2,23 @@ import Task from '../models/taskModel.js';
 
 export const createTask = async (req, res) => {
     try {
-        const { description } = req.body;
+        const { title, description, dueDate } = req.body;
         const userId = req.user.id;
 
+        const normalizedTitle = title?.trim();
+        const normalizedDescription = description?.trim();
+        const parsedDueDate = dueDate ? new Date(dueDate) : undefined;
+        const normalizedDueDate =
+            parsedDueDate && !Number.isNaN(parsedDueDate.getTime()) ? parsedDueDate : undefined;
+
+        if (!normalizedTitle && !normalizedDescription) {
+            return res.status(400).json({ message: 'Provide a title or description' });
+        }
+
         const task = await Task.create({
-            description,
+            title: normalizedTitle,
+            description: normalizedDescription ?? normalizedTitle,
+            dueDate: normalizedDueDate,
             completed: false,
             createBy: userId,
         });

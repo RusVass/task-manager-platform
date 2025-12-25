@@ -9,6 +9,7 @@ dotenv.config();
 // Routes
 import authRouter from './routes/authRoutes.js';
 import taskRouter from './routes/taskRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import swaggerSpec from './config/swagger.js';
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 app.use('/api', authRouter);
 app.use('/api', taskRouter);
+app.use('/api', userRouter);
 
 app.listen(port, () => {
     console.log(

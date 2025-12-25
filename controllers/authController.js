@@ -6,6 +6,11 @@ export const register = async (req, res) => {
     try {
         const { username, email, password: pass } = req.body;
 
+        const adminCount = await User.countDocuments({ role: 'admin' });
+        const isAdminEmail =
+            process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
+        const role = adminCount === 0 || isAdminEmail ? 'admin' : 'user';
+
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(pass, salt);
 
@@ -13,7 +18,7 @@ export const register = async (req, res) => {
             username,
             email,
             password: hash,
-            role: 'user',
+            role,
         });
 
         const { password, ...userData } = user._doc;
@@ -43,6 +48,10 @@ export const login = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        if (user.blocked) {
+            return res.status(403).json({ message: 'User is blocked' });
+        }
+
         const isValid = await bcrypt.compare(pass, user.password);
 
         if (!isValid) {
@@ -68,5 +77,20 @@ export const login = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Unable to login' });
+    }
+};
+
+export const profile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ user });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Unable to fetch profile' });
     }
 };
