@@ -13,7 +13,7 @@ export async function GET() {
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, status } = await backendFetch<Task[]>(
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const body = (await request.json()) as CreateTaskBody;
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     if (!title && !description) {
         return NextResponse.json(
-            { message: 'Опишіть задачу або додайте назву' },
+            { message: 'Provide a description or add a title' },
             { status: 400 }
         );
     }
@@ -59,9 +59,6 @@ export async function POST(request: Request) {
         token
     );
 
-    return NextResponse.json(
-        data ?? { message: 'Не вдалося створити задачу' },
-        { status }
-    );
+    return NextResponse.json(data ?? { message: 'Failed to create task' }, { status });
 }
 

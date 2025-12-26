@@ -17,7 +17,7 @@ export async function GET(
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, status } = await backendFetch<Task>(
@@ -26,10 +26,7 @@ export async function GET(
         token
     );
 
-    return NextResponse.json(
-        data ?? { message: 'Не вдалося отримати задачу' },
-        { status }
-    );
+    return NextResponse.json(data ?? { message: 'Failed to fetch task' }, { status });
 }
 
 export async function PUT(
@@ -40,14 +37,14 @@ export async function PUT(
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const body = (await request.json()) as UpdateTaskBody;
 
     if (typeof body.description === 'undefined' && typeof body.completed === 'undefined') {
         return NextResponse.json(
-            { message: 'Немає полів для оновлення' },
+            { message: 'No fields to update' },
             { status: 400 }
         );
     }
@@ -61,10 +58,7 @@ export async function PUT(
         token
     );
 
-    return NextResponse.json(
-        data ?? { message: 'Не вдалося оновити задачу' },
-        { status }
-    );
+    return NextResponse.json(data ?? { message: 'Failed to update task' }, { status });
 }
 
 export async function DELETE(
@@ -75,7 +69,7 @@ export async function DELETE(
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, status } = await backendFetch<{ message?: string }>(
@@ -84,9 +78,6 @@ export async function DELETE(
         token
     );
 
-    return NextResponse.json(
-        data ?? { message: 'Не вдалося видалити задачу' },
-        { status }
-    );
+    return NextResponse.json(data ?? { message: 'Failed to delete task' }, { status });
 }
 

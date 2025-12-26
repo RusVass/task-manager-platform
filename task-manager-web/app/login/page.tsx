@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ErrorResponse {
     message?: string;
 }
+
+const EMAIL_STORAGE_KEY = 'tm_login_emails';
+const LAST_EMAIL_KEY = 'tm_login_last_email';
+const REMEMBER_KEY = 'tm_login_remember';
+const EMAIL_STORAGE_LIMIT = 5;
 
 export default function LoginPage() {
     const router = useRouter();
@@ -15,11 +20,64 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [storedEmails, setStoredEmails] = useState<string[]>([]);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const redirectTo = searchParams.get('from') ?? '/tasks';
     const isDisabled = !email.trim() || !password.trim() || isLoading;
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const savedEmails = safeParseEmails(localStorage.getItem(EMAIL_STORAGE_KEY));
+        setStoredEmails(savedEmails);
+
+        const shouldRemember = localStorage.getItem(REMEMBER_KEY) === 'true';
+        setRememberMe(shouldRemember);
+
+        if (shouldRemember) {
+            const lastEmail = localStorage.getItem(LAST_EMAIL_KEY);
+            if (lastEmail) setEmail(lastEmail);
+        }
+    }, []);
+
+    const persistEmail = (value: string) => {
+        if (typeof window === 'undefined') return;
+
+        const normalized = value.trim();
+        if (!normalized) return;
+
+        setStoredEmails((prev) => {
+            const next = Array.from(new Set([normalized, ...prev])).slice(0, EMAIL_STORAGE_LIMIT);
+            localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(next));
+            return next;
+        });
+
+        if (rememberMe) {
+            localStorage.setItem(LAST_EMAIL_KEY, normalized);
+            localStorage.setItem(REMEMBER_KEY, 'true');
+        }
+    };
+
+    const handleRememberChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (typeof window === 'undefined') return;
+
+        const checked = event.target.checked;
+        setRememberMe(checked);
+
+        if (!checked) {
+            localStorage.removeItem(REMEMBER_KEY);
+            localStorage.removeItem(LAST_EMAIL_KEY);
+            return;
+        }
+
+        localStorage.setItem(REMEMBER_KEY, 'true');
+        if (email.trim()) {
+            localStorage.setItem(LAST_EMAIL_KEY, email.trim());
+        }
+    };
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
         setIsLoading(true);
@@ -28,7 +86,7 @@ export default function LoginPage() {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, rememberMe }),
             });
 
             if (!response.ok) {
@@ -37,6 +95,7 @@ export default function LoginPage() {
                 return;
             }
 
+            persistEmail(email);
             router.push(redirectTo);
         } catch (err) {
             console.error(err);
@@ -86,7 +145,13 @@ export default function LoginPage() {
                                     required
                                     autoComplete="email"
                                     placeholder="Enter email"
+                                    list="email-suggestions"
                                 />
+                                <datalist id="email-suggestions">
+                                    {storedEmails.map((item) => (
+                                        <option key={item} value={item} />
+                                    ))}
+                                </datalist>
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-indigo-100">Password</label>
@@ -99,6 +164,19 @@ export default function LoginPage() {
                                     autoComplete="current-password"
                                     placeholder="Enter password"
                                 />
+                            </div>
+
+                            <div className="flex items-center justify-between text-sm text-indigo-100/80">
+                                <label className="flex items-center gap-2">
+                                    <input
+                                        className="h-4 w-4 rounded border border-white/30 bg-white/10 text-indigo-400 focus:ring-indigo-300/60"
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={handleRememberChange}
+                                        aria-label="Remember me"
+                                    />
+                                    Remember me
+                                </label>
                             </div>
 
                             {error ? (
@@ -144,4 +222,20 @@ export default function LoginPage() {
             </div>
         </div>
     );
+}
+
+function safeParseEmails(raw: string | null): string[] {
+    if (!raw) return [];
+
+    try {
+        const parsed = JSON.parse(raw) as unknown;
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter((item): item is string => typeof item === 'string')
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .slice(0, EMAIL_STORAGE_LIMIT);
+    } catch {
+        return [];
+    }
 }

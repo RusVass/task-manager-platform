@@ -7,7 +7,7 @@ export async function GET() {
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, status } = await backendFetch<Task[]>(

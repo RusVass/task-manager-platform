@@ -8,12 +8,12 @@ interface ErrorProps {
 export default function ErrorBoundary({ error, reset }: ErrorProps) {
     return (
         <div className="card space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">Сталася помилка</h2>
+            <h2 className="text-xl font-semibold text-slate-900">An error occurred</h2>
             <p className="text-sm text-slate-700">
-                {error.message || 'Невідома помилка. Спробуйте ще раз.'}
+                {error.message || 'Unknown error. Please try again.'}
             </p>
             <button className="button secondary w-fit" onClick={reset}>
-                Повторити
+                Retry
             </button>
         </div>
     );

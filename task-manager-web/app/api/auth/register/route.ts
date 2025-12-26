@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
         if (!body.username || !body.email || !body.password) {
             return NextResponse.json(
-                { message: 'Усі поля обовʼязкові' },
+                { message: 'All fields are required' },
                 { status: 400 }
             );
         }
@@ -42,12 +42,12 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { message: data?.message ?? 'Не вдалося зареєструватися' },
+            { message: data?.message ?? 'Failed to sign up' },
             { status }
         );
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: 'Серверна помилка' }, { status: 500 });
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
     }
 }
 

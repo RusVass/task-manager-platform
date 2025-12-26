@@ -16,7 +16,7 @@ export async function PATCH(
     const token = await getTokenFromCookie();
 
     if (!token) {
-        return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const body = (await request.json()) as BlockBody;
@@ -30,9 +30,6 @@ export async function PATCH(
         token
     );
 
-    return NextResponse.json(
-        data ?? { message: 'Не вдалося оновити користувача' },
-        { status }
-    );
+    return NextResponse.json(data ?? { message: 'Failed to update user' }, { status });
 }
 

@@ -26,21 +26,21 @@ export function UsersList({ users }: UsersListProps) {
 
             if (!response.ok) {
                 const body = (await response.json().catch(() => ({}))) as { message?: string };
-                setError(body.message ?? 'Не вдалося оновити користувача');
+                setError(body.message ?? 'Failed to update user');
                 return;
             }
 
             await router.refresh();
         } catch (err) {
             console.error(err);
-            setError('Сервер недоступний');
+            setError('Server unavailable');
         } finally {
             setPendingId(null);
         }
     };
 
     if (users.length === 0) {
-        return <p className="text-slate-600">Користувачів поки немає.</p>;
+        return <p className="text-slate-600">No users yet.</p>;
     }
 
     return (
@@ -52,31 +52,59 @@ export function UsersList({ users }: UsersListProps) {
                     return (
                         <div
                             key={user._id}
-                            className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                            className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/10 p-4 text-indigo-50 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div className="space-y-1">
-                                <p className="text-sm font-semibold text-slate-900">{user.username}</p>
-                                <p className="text-sm text-slate-600">{user.email}</p>
-                                <p className="text-xs text-slate-500">
-                                    Роль: {user.role} • Статус: {user.blocked ? 'Заблокований' : 'Активний'}
+                                <p className="text-sm font-semibold text-indigo-50">{user.username}</p>
+                                <p className="text-sm text-indigo-100/80">{user.email}</p>
+                                <p className="text-xs text-indigo-100/70">
+                                    Role: {user.role} • Status: {user.blocked ? 'Blocked' : 'Active'}
                                 </p>
                             </div>
                             <div className="flex gap-2">
                                 <button
-                                    className="button secondary"
+                                    className="group flex items-center gap-2 rounded-xl bg-[#525866] px-4 py-2 text-white shadow-sm transition hover:bg-[#5d6474]"
                                     type="button"
                                     disabled={isPending}
                                     onClick={() => toggleBlock(user._id, false)}
                                 >
-                                    {isPending ? '...' : 'Розблокувати'}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        className="h-5 w-5 text-white transition group-hover:text-white"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M9 10.5V8.25a3.75 3.75 0 0 1 7.5 0V9M6.75 10.5h10.5v6A2.25 2.25 0 0 1 15 18.75h-6A2.25 2.25 0 0 1 6.75 16.5v-6Z"
+                                        />
+                                    </svg>
+                                    {isPending ? '...' : 'Unblock'}
                                 </button>
                                 <button
-                                    className="button danger"
+                                    className="group flex items-center gap-2 rounded-xl bg-[#525866] px-4 py-2 text-white shadow-sm transition hover:bg-[#5d6474]"
                                     type="button"
                                     disabled={isPending}
                                     onClick={() => toggleBlock(user._id, true)}
                                 >
-                                    {isPending ? '...' : 'Заблокувати'}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        className="h-5 w-5 text-white transition group-hover:text-white"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M16.5 10.5V8.25a4.5 4.5 0 0 0-9 0v2.25M6.75 10.5h10.5v6A2.25 2.25 0 0 1 15 18.75h-6A2.25 2.25 0 0 1 6.75 16.5v-6Z"
+                                        />
+                                    </svg>
+                                    {isPending ? '...' : 'Block'}
                                 </button>
                             </div>
                         </div>

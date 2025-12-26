@@ -13,7 +13,7 @@ export async function GET() {
         const token = await getTokenFromCookie();
 
         if (!token) {
-            return NextResponse.json({ message: 'Неавторизовано' }, { status: 401 });
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
         const { data, status } = await backendFetch<ProfileResponse>(
@@ -27,12 +27,12 @@ export async function GET() {
         }
 
         return NextResponse.json(
-            { message: data?.message ?? 'Не вдалося отримати профіль' },
+            { message: data?.message ?? 'Failed to fetch profile' },
             { status }
         );
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: 'Серверна помилка' }, { status: 500 });
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
     }
 }
 

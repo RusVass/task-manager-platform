@@ -30,14 +30,14 @@ export default function Home() {
 
             if (!response.ok) {
                 const body = (await response.json()) as ErrorResponse;
-                setError(body.message ?? 'Не вдалося створити акаунт');
+                setError(body.message ?? 'Could not create account');
                 return;
             }
 
             router.push('/login');
         } catch (err) {
             console.error(err);
-            setError('Сервер недоступний');
+            setError('Server unavailable');
         } finally {
             setIsLoading(false);
         }
@@ -59,11 +59,11 @@ export default function Home() {
                         </div>
                         <div className="space-y-4">
                             <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-                                Створіть акаунт і керуйте задачами безпечно
+                                Create an account and manage tasks securely
                             </h1>
                             <p className="text-lg text-indigo-100/80">
-                                Відразу реєструйтесь на головній і працюйте з командами через
-                                захищений проксі до бекенду.
+                                Sign up on the landing page and work with teams through a secure proxy
+                                to the backend.
                             </p>
                         </div>
                     </div>
@@ -72,17 +72,17 @@ export default function Home() {
                         <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">
                             <div className="mb-6 space-y-2">
                                 <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100/80">
-                                    Реєстрація
+                                    Sign up
                                 </p>
                                 <p className="text-lg text-indigo-50/90">
-                                    Заповніть форму і переходьте до задач за кілька секунд.
+                                    Fill out the form and jump to tasks in seconds.
                                 </p>
                             </div>
 
                             <form className="space-y-4" onSubmit={handleSubmit}>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-indigo-100">
-                                        Ім&apos;я
+                                        Name
                                     </label>
                                     <input
                                         className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-indigo-50 placeholder:text-indigo-100/50 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-300/40"
@@ -90,7 +90,7 @@ export default function Home() {
                                         onChange={(e) => setUsername(e.target.value)}
                                         required
                                         autoComplete="username"
-                                        placeholder="Введіть ім’я"
+                                        placeholder="Enter your name"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -109,7 +109,7 @@ export default function Home() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-indigo-100">
-                                        Пароль
+                                        Password
                                     </label>
                                     <input
                                         className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-indigo-50 placeholder:text-indigo-100/50 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-300/40"
@@ -119,7 +119,7 @@ export default function Home() {
                                         required
                                         autoComplete="new-password"
                                         minLength={6}
-                                        placeholder="Не менше 6 символів"
+                                        placeholder="At least 6 characters"
                                     />
                                 </div>
 
@@ -132,14 +132,14 @@ export default function Home() {
                                     type="submit"
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? 'Реєстрація...' : 'Створити акаунт'}
+                                    {isLoading ? 'Signing up...' : 'Create account'}
                                 </button>
                             </form>
 
                             <div className="mt-6 text-sm text-indigo-100/80">
-                                Вже є акаунт?{' '}
+                                Already have an account?{' '}
                                 <Link href="/login" className="font-semibold text-indigo-100">
-                                    Увійти
+                                    Sign in
                                 </Link>
                             </div>
                         </div>

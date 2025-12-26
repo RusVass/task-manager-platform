@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
     title: 'Task Manager',
-    description: 'Керування задачами з безпечним входом.',
+    description: 'Task management with secure sign-in.',
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="uk">
+        <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <main className="min-h-screen">{children}</main>
             </body>
