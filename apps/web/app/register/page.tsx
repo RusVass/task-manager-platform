@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -55,16 +56,92 @@ export default function RegisterPage() {
 
             <div className="relative flex min-h-screen w-full items-center px-5 py-12 sm:px-10 lg:px-16">
                 <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="space-y-3 lg:max-w-xl">
-                        <p className="text-lg font-bold uppercase tracking-[0.25em] text-indigo-100 sm:text-xl">
-                            TASK MANAGER
-                        </p>
-                        <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
-                            Create your account and start managing tasks
-                        </h1>
-                        <p className="text-sm text-indigo-100/70">
-                            Quick signup to get your team moving faster.
-                        </p>
+                    <div className="w-full max-w-2xl space-y-4">
+                        <div className="space-y-2">
+                            <p className="text-lg font-bold uppercase tracking-[0.25em] text-indigo-100 sm:text-xl">
+                                TASK MANAGER
+                            </p>
+                            <p className="text-sm text-indigo-100/70">
+                                Create your account and start managing tasks.
+                            </p>
+                        </div>
+                        <div
+                            className="grid gap-0"
+                            style={{
+                                gridTemplateColumns: '1fr 1fr',
+                                gridTemplateAreas: '"wide1 tall2" "tall3 tall2" "tall3 wide4"',
+                            }}
+                        >
+                            <div
+                                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl"
+                                style={{
+                                    gridArea: 'wide1',
+                                    aspectRatio: '16 / 9',
+                                    transform: 'translate(20px, 150px) scale(0.9)',
+                                    transformOrigin: 'center',
+                                }}
+                            >
+                                <Image
+                                    src="/2.jpg"
+                                    alt="Strategic planning board"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                    priority
+                                />
+                            </div>
+                            <div
+                                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl"
+                                style={{
+                                    gridArea: 'tall2',
+                                    aspectRatio: '2 / 3',
+                                    transform: 'translate(-30px, -11px) scale(0.7)',
+                                    transformOrigin: 'center',
+                                }}
+                            >
+                                <Image
+                                    src="/1.jpg"
+                                    alt="Project management sketch"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div
+                                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl"
+                                style={{
+                                    gridArea: 'tall3',
+                                    aspectRatio: '2 / 3',
+                                    transform: 'translate(44px, 88px) scale(0.7)',
+                                    transformOrigin: 'center',
+                                }}
+                            >
+                                <Image
+                                    src="/4.jpg"
+                                    alt="Team analytics workspace"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div
+                                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl"
+                                style={{
+                                    gridArea: 'wide4',
+                                    aspectRatio: '16 / 9',
+                                    transform: 'translate(-2px, -74px) scale(0.9)',
+                                    transformOrigin: 'center',
+                                }}
+                            >
+                                <Image
+                                    src="/3.png"
+                                    alt="Happy listening to music"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">

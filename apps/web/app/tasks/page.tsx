@@ -181,9 +181,11 @@ export default async function TasksPage() {
                     ) : (
                         tasks.map((task) => <TaskCard key={task._id} task={task} />)
                     )}
+                    <p className="text-xs text-indigo-100/70">
+                        Admin panel is available separately and shows all tasks and the user list.
+                    </p>
                 </div>
             </div>
         </div>
     );
 }
-

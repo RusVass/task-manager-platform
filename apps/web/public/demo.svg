@@ -33,7 +33,7 @@
 
   <g transform="translate(160 170)">
     <rect x="0" y="0" width="960" height="180" rx="20" fill="url(#card)" stroke="rgba(255,255,255,0.14)"/>
-    <text x="32" y="48" fill="#c7d2fe" font-size="16" font-family="Inter, system-ui" font-weight="600">Нова задача</text>
+    <text x="32" y="48" fill="#c7d2fe" font-size="16" font-family="Inter, system-ui" font-weight="600">New task</text>
     <rect x="32" y="70" width="260" height="46" rx="12" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)"/>
     <text x="48" y="100" fill="#e2e8f0" font-size="14" font-family="Inter, system-ui">Title</text>
     <rect x="320" y="70" width="200" height="46" rx="12" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)"/>
@@ -46,7 +46,7 @@
 
   <g transform="translate(160 380)">
     <rect x="0" y="0" width="960" height="260" rx="20" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)"/>
-    <text x="32" y="44" fill="#c7d2fe" font-size="16" font-family="Inter, system-ui" font-weight="600">Мої задачі</text>
+    <text x="32" y="44" fill="#c7d2fe" font-size="16" font-family="Inter, system-ui" font-weight="600">My tasks</text>
 
     <g transform="translate(32 70)">
       <rect width="896" height="64" rx="14" fill="url(#card)" stroke="rgba(255,255,255,0.12)"/>
@@ -76,6 +76,6 @@
     </g>
   </g>
 
-  <text x="160" y="672" fill="#94a3b8" font-size="13" font-family="Inter, system-ui">Панель admin доступна окремо та показує всі задачі та список користувачів.</text>
+  <text x="160" y="672" fill="#94a3b8" font-size="13" font-family="Inter, system-ui">Admin panel is available separately and shows all tasks and the user list.</text>
 </svg>
 
