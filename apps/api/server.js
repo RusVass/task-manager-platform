@@ -1,10 +1,15 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import swaggerUI from 'swagger-ui-express';
+import path from 'path';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import './config/db.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Routes
 import authRouter from './routes/authRoutes.js';

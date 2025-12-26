@@ -1,179 +1,69 @@
-# ✅ Task Manager API
+# ✅ Task Manager (API + Web)
+Full-stack task management platform: Express + MongoDB REST API and Next.js (App Router) frontend with admin/user roles, JWT, tasks list, and admin panel.
 
-Простий REST API для керування задачами на Express + MongoDB з JWT авторизацією, ролями admin / user та Swagger UI.
+![Demo](./apps/web/public/demo.svg)
 
-## 🚀 Стек
-- Node.js
-- Express
-- MongoDB + Mongoose
-- JWT (Bearer Token)
-- Swagger UI
-- Nodemon
+## Stack
+- Backend: Node.js, Express, MongoDB + Mongoose, JWT, Swagger UI, Nodemon
+- Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, Server Actions + Next.js API routes; JWT зберігається в httpOnly cookie, видається через API route handlers.
 
-## ✅ Вимоги
-- Node.js 20+
-- Будь-який доступний MongoDB (cloud / локально) у `MONGODB_URI`
-- NPM для локального запуску або Docker для контейнера
-
-## ⚙️ Локальний запуск
-1. Встановити залежності
-   ```
-   npm install
-   ```
-2. Створити .env
-   ```
-   MONGODB_URI="your-mongodb-uri"
-   PORT=3001
-   JWT_SECRET="your-jwt-secret"
-   ```
-3. Запустити сервер
-   ```
-   npm run dev
-   ```
-
-Сервер стартує на http://localhost:3001 (можна змінити через `PORT`).
-
-Для продакшен-запуску без nodemon:
+## Repository structure
 ```
-npm ci
-node server.js
+.
+├─ apps/
+│  ├─ api/           # Express API (controllers, routes, config)
+│  └─ web/           # Next.js App Router frontend
+├─ docker-compose.yml # API + MongoDB
 ```
 
-## 🐳 Docker
-1. Створіть `.env` (аналогічно локальному запуску).
-2. Зберіть образ і підніміть контейнер:
-   ```
-   npm run docker:build
-   npm run docker:up
-   ```
-3. Логи: `npm run docker:logs`  
-4. Перезапуск: `npm run docker:restart`  
-5. Зупинка та видалення контейнера: `npm run docker:down`
+## Quick start (local)
+### Backend (API)
+1) Install deps  
+`cd apps/api && npm install`
 
-Контейнер слухає порт `3001` всередині; мапінг у скриптах вже робить `-p 3001:3001`.
-
-## 🔐 Авторизація (JWT)
-### ✅ Реєстрація
-`POST /api/auth/register`
-
-Body:
+2) Create `apps/api/.env`:
 ```
-{
-  "username": "test",
-  "email": "test@gmail.com",
-  "password": "123456"
-}
+MONGODB_URI=mongodb://localhost:27017/task-manager
+PORT=3001
+JWT_SECRET=super-secret
 ```
 
-- Роль примусово встановлюється як user.
-- Поле role з body ігнорується.
+3) Run dev server  
+`npm run dev`  
+API: `http://localhost:3001`, Swagger: `http://localhost:3001/api/docs`.
 
-### ✅ Логін
-`POST /api/auth/login`
+### Frontend (Next.js)
+1) Go to client  
+`cd apps/web && npm install`
 
-Body:
+2) Create `apps/web/.env.local`:
 ```
-{
-  "email": "test@gmail.com",
-  "password": "123456"
-}
-```
-
-Відповідь:
-```
-{
-  "token": "...",
-  "user": {
-    "_id": "...",
-    "email": "...",
-    "role": "admin | user"
-  }
-}
+BACKEND_URL=http://localhost:3001
+APP_BASE_URL=http://localhost:3000
+COOKIE_NAME=tm_token
 ```
 
-### 🔑 Bearer Token
-У всі захищені запити додавай заголовок:
+3) Start UI  
+`npm run dev`  
+UI: `http://localhost:3000`
 
-`Authorization: Bearer <token>`
+## Features
+- Registration/login with JWT, токен у HTTP-only cookie (Next.js API routes/Server Actions).
+- Roles: `user` (own tasks) and `admin` (all tasks + user management).
+- Tasks CRUD: create, list, update status/description, delete.
+- Admin panel: users list, block/unblock, view all tasks.
+- Swagger UI for API testing.
 
-## 👥 Ролі
-| Роль | Права |
-| --- | --- |
-| user | Працює тільки зі своїми задачами |
-| admin | Працює зі своїми задачами + бачить всі задачі |
+## Key endpoints (JWT Bearer)
+- Auth: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/profile`
+- Tasks: `GET /api/tasks/my`, `GET /api/tasks` (admin), `POST /api/tasks`, `GET/PUT/DELETE /api/tasks/:id`
+- Users (admin): `GET /api/users`, `PATCH /api/users/:id/block`
 
-> Реєстрація завжди створює користувача з роллю `user`. Роль `admin` можна видати вручну через базу даних.
+## Docker (API + MongoDB)
+- One command: `docker compose up --build` (uses `apps/api/Dockerfile`, seeds MongoDB via env)
+- Stop: `docker compose down` (volumes persist `mongo-data`)
+- Needs `apps/api/.env` or env vars for `MONGODB_URI`, `PORT`, `JWT_SECRET`.
 
-## ✅ Tasks API (потрібен Bearer Token)
-### ➕ Створити задачу
-`POST /api/task`
-
-Body:
-```
-{
-  "description": "My first task"
-}
-```
-
-### 📄 Отримати СВОЇ задачі
-`GET /api/task/my`
-
-Доступ: user, admin
-
-### 📄 Отримати ВСІ задачі
-`GET /api/task`
-
-Доступ: тільки admin
-
-### 🔍 Отримати одну свою задачу
-`GET /api/task/:id`
-
-Доступ: тільки власник задачі
-
-### ✏️ Оновити задачу
-`PUT /api/task/:id`
-
-Body:
-```
-{
-  "description": "Updated text",
-  "completed": true
-}
-```
-
-Доступ: тільки власник задачі
-
-### 🗑 Видалити задачу
-`DELETE /api/task/:id`
-
-Доступ: тільки власник задачі
-
-## 📘 Swagger UI
-Документація доступна за адресою:
-
-`GET /api/docs`
-
-Натисніть Authorize та вставте `Bearer <token>` для тестування захищених ендпоінтів.
-
-## 🛠 Корисні команди
-```
-npm run dev          # запуск з nodemon
-npm run lint:check
-npm run lint:fix
-npm run format:check
-npm run format:write
-npm run docker:build # збирання Docker-образу
-npm run docker:up    # підняти контейнер
-npm run docker:down  # зупинити та видалити контейнер
-npm run docker:restart
-npm run docker:logs
-```
-
-## 📝 Нотатки
-- Обовʼязкові змінні середовища:
-  - `MONGODB_URI`
-  - `PORT`
-  - `JWT_SECRET`
-- Наповнення бази відбувається тільки через API
-- Всі задачі привʼязані до користувача через createBy
-- Адміністратор бачить усі задачі системи
+## Useful scripts
+- Backend (inside `apps/api`): `npm run dev`, `npm run lint:check`, `npm run lint:fix`, `npm run format:check`, `npm run format:write`
+- Frontend (inside `apps/web`): `npm run dev`, `npm run lint`, `npm run check`, `npm run build`

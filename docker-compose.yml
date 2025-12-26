@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: task-manager-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    env_file:
+      - ./apps/api/.env
+    environment:
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongo:27017/task-manager}
+      - PORT=${PORT:-3001}
+      - JWT_SECRET=${JWT_SECRET:-change-me}
+    ports:
+      - '3001:3001'
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
+

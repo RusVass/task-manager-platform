@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const { data, status } = await backendFetch<Task>(
-        `/api/task/${params.id}`,
+        `/api/tasks/${params.id}`,
         { method: 'GET' },
         token
     );
@@ -50,7 +50,7 @@ export async function PUT(
     }
 
     const { data, status } = await backendFetch<Task>(
-        `/api/task/${params.id}`,
+        `/api/tasks/${params.id}`,
         {
             method: 'PUT',
             body: JSON.stringify(body),
@@ -73,7 +73,7 @@ export async function DELETE(
     }
 
     const { data, status } = await backendFetch<{ message?: string }>(
-        `/api/task/${params.id}`,
+        `/api/tasks/${params.id}`,
         { method: 'DELETE' },
         token
     );

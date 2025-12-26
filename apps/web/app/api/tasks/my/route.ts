@@ -17,7 +17,7 @@ export async function GET() {
     }
 
     const { data, status } = await backendFetch<Task[]>(
-        '/api/task/my',
+        '/api/tasks/my',
         { method: 'GET' },
         token
     );
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     };
 
     const { data, status } = await backendFetch<Task>(
-        '/api/task',
+        '/api/tasks',
         {
             method: 'POST',
             body: JSON.stringify(payload),

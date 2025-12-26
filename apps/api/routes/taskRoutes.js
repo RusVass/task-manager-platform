@@ -7,7 +7,7 @@ const router = express.Router();
 
 /**
  * @openapi
- * '/api/task':
+ * '/api/tasks':
  *  post:
  *     tags:
  *     - Task
@@ -31,11 +31,11 @@ const router = express.Router();
  *        description: Bad Request
  */
 
-router.post('/task', checkAuth, taskController.createTask);
+router.post('/tasks', checkAuth, taskController.createTask);
 
 /**
  * @openapi
- * '/api/task/my':
+ * '/api/tasks/my':
  *  get:
  *     tags:
  *     - Task
@@ -63,10 +63,10 @@ router.post('/task', checkAuth, taskController.createTask);
  *       400:
  *         description: Bad request
  */
-router.get('/task/my', checkAuth, taskController.getTasksByUserId);
-router.get('/task/:id', checkAuth, taskController.getTask);
-router.put('/task/:id', checkAuth, taskController.updateTask);
-router.delete('/task/:id', checkAuth, taskController.deleteTask);
-router.get('/task', checkAuth, requireRole('admin'), taskController.getAllTasks);
+router.get('/tasks/my', checkAuth, taskController.getTasksByUserId);
+router.get('/tasks/:id', checkAuth, taskController.getTask);
+router.put('/tasks/:id', checkAuth, taskController.updateTask);
+router.delete('/tasks/:id', checkAuth, taskController.deleteTask);
+router.get('/tasks', checkAuth, requireRole('admin'), taskController.getAllTasks);
 
 export default router;

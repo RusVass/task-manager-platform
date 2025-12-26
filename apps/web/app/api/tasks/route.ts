@@ -11,7 +11,7 @@ export async function GET() {
     }
 
     const { data, status } = await backendFetch<Task[]>(
-        '/api/task',
+        '/api/tasks',
         { method: 'GET' },
         token
     );
