@@ -4,20 +4,46 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-interface ErrorResponse {
-    message?: string;
-}
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '@/lib/firebase';
 
 export default function RegisterPage() {
     const router = useRouter();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [error, setError] = useState<string | null>(null);
     const isDisabled = !username.trim() || !email.trim() || !password.trim() || isLoading;
+
+    const handleGoogleSignUp = async () => {
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const credential = await signInWithPopup(auth, googleProvider);
+            const idToken = await credential.user.getIdToken(true);
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken }),
+            });
+
+            if (!response.ok) {
+                const body = (await response.json()) as { message?: string };
+                setError(body.message ?? 'Не вдалося створити акаунт');
+                return;
+            }
+
+            router.push('/tasks');
+        } catch (err) {
+            console.error(err);
+            setError('Google sign-up failed');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -32,7 +58,7 @@ export default function RegisterPage() {
             });
 
             if (!response.ok) {
-                const body = (await response.json()) as ErrorResponse;
+                const body = (await response.json()) as { message?: string };
                 setError(body.message ?? 'Failed to create account');
                 return;
             }
@@ -66,7 +92,7 @@ export default function RegisterPage() {
                             </p>
                         </div>
                         <div
-                            className="grid gap-0"
+                            className="hidden gap-0 lg:grid"
                             style={{
                                 gridTemplateColumns: '1fr 1fr',
                                 gridTemplateAreas: '"wide1 tall2" "tall3 tall2" "tall3 wide4"',
@@ -147,7 +173,41 @@ export default function RegisterPage() {
                     <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">
                         <div className="mb-6 space-y-2">
                             <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100/80">
-                                Sign up
+                                Sign up with Google
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {error ? (
+                                <p className="text-sm text-rose-200">{error}</p>
+                            ) : (
+                                <p className="text-sm text-indigo-100/70">
+                                    Створіть акаунт через Google та керуйте задачами.
+                                </p>
+                            )}
+
+                            <button
+                                className="flex h-12 w-full items-center justify-center rounded-xl bg-indigo-400 px-4 font-semibold text-slate-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-70"
+                                type="button"
+                                onClick={handleGoogleSignUp}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+                                        Створюємо...
+                                    </span>
+                                ) : (
+                                    'Увійти через Google'
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="my-6 h-px w-full bg-white/10" />
+
+                        <div className="mb-4 space-y-2">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100/80">
+                                Sign up with Email
                             </p>
                         </div>
 
@@ -189,14 +249,6 @@ export default function RegisterPage() {
                                 />
                             </div>
 
-                            {error ? (
-                                <p className="text-sm text-rose-200">{error}</p>
-                            ) : (
-                                <p className="text-sm text-indigo-100/70">
-                                    Data is sent over a secure connection.
-                                </p>
-                            )}
-
                             <button
                                 className="flex h-12 w-full items-center justify-center rounded-xl bg-indigo-400 px-4 font-semibold text-slate-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-70"
                                 type="submit"
@@ -205,19 +257,19 @@ export default function RegisterPage() {
                                 {isLoading ? (
                                     <span className="flex items-center gap-2">
                                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
-                                        Creating...
+                                        Створюємо...
                                     </span>
                                 ) : (
-                                    'Create account'
+                                    'Створити акаунт'
                                 )}
                             </button>
                         </form>
 
                         <div className="mt-6 space-y-2 text-sm text-indigo-100/80">
                             <div>
-                                Already have an account?{' '}
+                                Уже є акаунт?{' '}
                                 <Link href="/login" className="font-semibold text-indigo-100">
-                                    Sign in
+                                    Увійти
                                 </Link>
                             </div>
                         </div>

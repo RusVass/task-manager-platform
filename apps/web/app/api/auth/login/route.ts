@@ -4,13 +4,14 @@ import { clearTokenCookie, ONE_WEEK_SECONDS, setTokenCookie } from '@/lib/sessio
 import type { User } from '@/types/user';
 
 interface LoginBody {
+    idToken?: string;
     email?: string;
     password?: string;
     rememberMe?: boolean;
 }
 
 interface LoginResponse {
-    token: string;
+    token?: string;
     user: User;
     message?: string;
 }
@@ -18,8 +19,28 @@ interface LoginResponse {
 export async function POST(request: Request) {
     try {
         const body = (await request.json()) as LoginBody;
-        const rememberMe = Boolean(body.rememberMe);
 
+        // Firebase ID Token шлях (Google)
+        if (body.idToken) {
+            const { data, status } = await backendFetch<LoginResponse>(
+                '/api/auth/profile',
+                { method: 'GET' },
+                body.idToken
+            );
+
+            if (status >= 200 && status < 300 && data?.user) {
+                await setTokenCookie(body.idToken);
+                return NextResponse.json({ user: data.user });
+            }
+
+            await clearTokenCookie();
+            return NextResponse.json(
+                { message: data?.message ?? 'Failed to sign in' },
+                { status }
+            );
+        }
+
+        // Локальний email/password шлях
         if (!body.email || !body.password) {
             return NextResponse.json(
                 { message: 'Email and password are required' },
@@ -27,6 +48,7 @@ export async function POST(request: Request) {
             );
         }
 
+        const rememberMe = Boolean(body.rememberMe);
         const { data, status } = await backendFetch<LoginResponse>(
             '/api/auth/login',
             {
@@ -38,7 +60,7 @@ export async function POST(request: Request) {
             }
         );
 
-        if (status >= 200 && status < 300 && data?.token) {
+        if (status >= 200 && status < 300 && data?.token && data?.user) {
             await setTokenCookie(data.token, rememberMe ? ONE_WEEK_SECONDS : undefined);
             return NextResponse.json({ user: data.user });
         }

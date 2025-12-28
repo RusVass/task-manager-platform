@@ -1,84 +1,54 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-interface ErrorResponse {
-    message?: string;
-}
-
-const EMAIL_STORAGE_KEY = 'tm_login_emails';
-const LAST_EMAIL_KEY = 'tm_login_last_email';
-const REMEMBER_KEY = 'tm_login_remember';
-const EMAIL_STORAGE_LIMIT = 5;
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '@/lib/firebase';
 
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [storedEmails, setStoredEmails] = useState<string[]>([]);
     const [rememberMe, setRememberMe] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const redirectTo = searchParams.get('from') ?? '/tasks';
     const isDisabled = !email.trim() || !password.trim() || isLoading;
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
+    const handleGoogleSignIn = async () => {
+        setError(null);
+        setIsLoading(true);
 
-        const savedEmails = safeParseEmails(localStorage.getItem(EMAIL_STORAGE_KEY));
-        setStoredEmails(savedEmails);
+        try {
+            const credential = await signInWithPopup(auth, googleProvider);
+            const idToken = await credential.user.getIdToken(true);
 
-        const shouldRemember = localStorage.getItem(REMEMBER_KEY) === 'true';
-        setRememberMe(shouldRemember);
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken }),
+            });
 
-        if (shouldRemember) {
-            const lastEmail = localStorage.getItem(LAST_EMAIL_KEY);
-            if (lastEmail) setEmail(lastEmail);
-        }
-    }, []);
+            if (!response.ok) {
+                const body = (await response.json()) as { message?: string };
+                setError(body.message ?? 'Google sign-in failed');
+                return;
+            }
 
-    const persistEmail = (value: string) => {
-        if (typeof window === 'undefined') return;
-
-        const normalized = value.trim();
-        if (!normalized) return;
-
-        setStoredEmails((prev) => {
-            const next = Array.from(new Set([normalized, ...prev])).slice(0, EMAIL_STORAGE_LIMIT);
-            localStorage.setItem(EMAIL_STORAGE_KEY, JSON.stringify(next));
-            return next;
-        });
-
-        if (rememberMe) {
-            localStorage.setItem(LAST_EMAIL_KEY, normalized);
-            localStorage.setItem(REMEMBER_KEY, 'true');
+            router.push(redirectTo);
+        } catch (err) {
+            console.error(err);
+            setError('Google sign-in failed');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleRememberChange = (event: ChangeEvent<HTMLInputElement>) => {
-        if (typeof window === 'undefined') return;
-
-        const checked = event.target.checked;
-        setRememberMe(checked);
-
-        if (!checked) {
-            localStorage.removeItem(REMEMBER_KEY);
-            localStorage.removeItem(LAST_EMAIL_KEY);
-            return;
-        }
-
-        localStorage.setItem(REMEMBER_KEY, 'true');
-        if (email.trim()) {
-            localStorage.setItem(LAST_EMAIL_KEY, email.trim());
-        }
-    };
-
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
         setIsLoading(true);
@@ -91,12 +61,11 @@ export default function LoginPage() {
             });
 
             if (!response.ok) {
-                const body = (await response.json()) as ErrorResponse;
+                const body = (await response.json()) as { message?: string };
                 setError(body.message ?? 'Login failed');
                 return;
             }
 
-            persistEmail(email);
             router.push(redirectTo);
         } catch (err) {
             console.error(err);
@@ -126,7 +95,7 @@ export default function LoginPage() {
                             </p>
                         </div>
                         <div
-                            className="grid gap-0"
+                            className="hidden gap-0 lg:grid"
                             style={{
                                 gridTemplateColumns: '1fr 1fr',
                                 gridTemplateAreas: '"wide1 tall2" "tall3 tall2" "tall3 wide4"',
@@ -207,7 +176,41 @@ export default function LoginPage() {
                     <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">
                         <div className="mb-6 space-y-2">
                             <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100/80">
-                                Sign in
+                                Sign in with Google
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {error ? (
+                                <p className="text-sm text-rose-200">{error}</p>
+                            ) : (
+                                <p className="text-sm text-indigo-100/70">
+                                    Використовуйте Google, щоб увійти та отримати доступ до задач.
+                                </p>
+                            )}
+
+                            <button
+                                className="flex h-12 w-full items-center justify-center rounded-xl bg-indigo-400 px-4 font-semibold text-slate-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-70"
+                                type="button"
+                                onClick={handleGoogleSignIn}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
+                                        Увійти...
+                                    </span>
+                                ) : (
+                                    'Увійти через Google'
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="my-6 h-px w-full bg-white/10" />
+
+                        <div className="mb-4 space-y-2">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100/80">
+                                Sign in with Email
                             </p>
                         </div>
 
@@ -222,13 +225,7 @@ export default function LoginPage() {
                                     required
                                     autoComplete="email"
                                     placeholder="Enter email"
-                                    list="email-suggestions"
                                 />
-                                <datalist id="email-suggestions">
-                                    {storedEmails.map((item) => (
-                                        <option key={item} value={item} />
-                                    ))}
-                                </datalist>
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-indigo-100">Password</label>
@@ -242,28 +239,16 @@ export default function LoginPage() {
                                     placeholder="Enter password"
                                 />
                             </div>
-
-                            <div className="flex items-center justify-between text-sm text-indigo-100/80">
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        className="h-4 w-4 rounded border border-white/30 bg-white/10 text-indigo-400 focus:ring-indigo-300/60"
-                                        type="checkbox"
-                                        checked={rememberMe}
-                                        onChange={handleRememberChange}
-                                        aria-label="Remember me"
-                                    />
-                                    Remember me
-                                </label>
+                            <div className="flex items-center gap-2 text-sm text-indigo-100/80">
+                                <input
+                                    className="h-4 w-4 rounded border border-white/30 bg-white/10 text-indigo-400 focus:ring-indigo-300/60"
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    aria-label="Remember me"
+                                />
+                                Remember me
                             </div>
-
-                            {error ? (
-                                <p className="text-sm text-rose-200">{error}</p>
-                            ) : (
-                                <p className="text-sm text-indigo-100/70">
-                                    Data is sent over a secure connection.
-                                </p>
-                            )}
-
                             <button
                                 className="flex h-12 w-full items-center justify-center rounded-xl bg-indigo-400 px-4 font-semibold text-slate-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-70"
                                 type="submit"
@@ -272,25 +257,19 @@ export default function LoginPage() {
                                 {isLoading ? (
                                     <span className="flex items-center gap-2">
                                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-transparent" />
-                                        Loading...
+                                        Входимо...
                                     </span>
                                 ) : (
-                                    'Sign in'
+                                    'Увійти'
                                 )}
                             </button>
                         </form>
 
                         <div className="mt-6 space-y-2 text-sm text-indigo-100/80">
                             <div>
-                                No account?{' '}
+                                Немає акаунта?{' '}
                                 <Link href="/register" className="font-semibold text-indigo-100">
-                                    Sign up
-                                </Link>
-                            </div>
-                            <div>
-                                Forgot password?{' '}
-                                <Link href="/reset" className="font-semibold text-indigo-100">
-                                    Recover access
+                                    Зареєструватися
                                 </Link>
                             </div>
                         </div>
@@ -299,20 +278,4 @@ export default function LoginPage() {
             </div>
         </div>
     );
-}
-
-function safeParseEmails(raw: string | null): string[] {
-    if (!raw) return [];
-
-    try {
-        const parsed = JSON.parse(raw) as unknown;
-        if (!Array.isArray(parsed)) return [];
-        return parsed
-            .filter((item): item is string => typeof item === 'string')
-            .map((item) => item.trim())
-            .filter(Boolean)
-            .slice(0, EMAIL_STORAGE_LIMIT);
-    } catch {
-        return [];
-    }
 }
